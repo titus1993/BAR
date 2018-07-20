@@ -1,6 +1,6 @@
 pragma solidity ^0.4.25;
 
-import './node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'Ownable.sol';
 
 /**
  * @title Asset
@@ -19,30 +19,45 @@ contract Asset is Ownable {
     /**
      * passphrase
      * @var random generated string.
-     * If the Asset contract has no owner. The user must 
+     * If the Asset contract has no owner. The user must
      */
-    uint256 public passphrase;
+    uint256 private passphrase;
+
+
+    address public newOwner;
+
+    event NewOwnerAsset(address newOwner, string comment);
 
     /**
-     * 
+     *
      */
     constructor (
-        uint256 _passphrase, 
+        uint256 _passphrase,
         uint256 _serialNumber) public {
 
         serialNumber = _serialNumber;
         passphrase = _passphrase;
+
+        owner = address(0);
+        newOwner = address(0);
     }
 
-    /**
-     * [setFirstOwner description]
-     * @param {[type]} uint256 _passphrase [description]
-     */
-    function setFirstOwner(uint256 _passphrase) public {
-        
-        require(owner == address(0));
-        require(_passphrase == passphrase);
 
-        Owner owner = new Ownable();
+    function claimAssetOwnership(uint256 _passphrase, string _comment) public {
+        if(owner == address(0)){
+            require(_passphrase == passphrase);
+            owner = msg.sender;
+        }else{
+            require(newOwner == msg.sender);
+        }
+
+        emit NewOwnerAsset(msg.sender, _comment);
+    }
+
+
+    function transferAssetOwnership(address _newOwner) public onlyOwner {
+        owner = address(0);
+        newOwner = _newOwner;
+        emit OwnershipTransferred(msg.sender, _newOwner);
     }
 }
