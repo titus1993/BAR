@@ -1,20 +1,14 @@
 pragma solidity ^0.4.25;
 
 import './Asset.sol';
+import "./Ownable.sol";
 
 /**
  * @title AssetSeries
- * @dev 
+ * @dev
  * an Asset contract is tracked via an AssetSeries contract
  */
-contract AssetSeries {
-
-    /**
-     * creator
-     * @var indicates the creator of this AssetSeries contract.
-     * eg. a caps factory. Each cap is an Asset contract linked to this AssetSeries
-     */
-    address public creator;
+contract AssetSeries is Ownable{
 
     /**
      * series
@@ -25,8 +19,8 @@ contract AssetSeries {
 
     /**
      * currentAssetNumber
-     * @var 
-     * 
+     * @var
+     *
      */
     uint256 public currentAssetNumber;
 
@@ -34,34 +28,30 @@ contract AssetSeries {
      * assets
      * @var Asset contracts to be linked.
      */
-    mapping (adress => Asset) public assets;
+    mapping (uint256 => Asset) public assets;
 
+
+
+    event CreatedAsset(uint256 series, address asset);
     /**
-     * 
+     *
      */
     constructor(uint256 _series) public {
-
-        require(_series >= 0);
-
         series = _series;
         currentAssetNumber = 0;
+        owner = msg.sender;
     }
 
-    /**
-     * createAsset Creates new Asset contract and increments the serial number
-     * @param  {[type]} ) public        returns (address Asset [description]
-     * @return {[type]}   [description]
-     */
-    function createAsset(uint256 passphrase) public returns (address Asset) {
+
+    function createAsset(uint256 passphrase) public onlyOwner returns (Asset asset) {
 
         currentAssetNumber = currentAssetNumber + 1;
         require(currentAssetNumber <= series);
 
-        Asset asset = new Asset(passphrase, currentAssetNumber);
+        asset = new Asset(passphrase, currentAssetNumber);
 
-        assets[asset] = asset;
+        assets[currentAssetNumber] = asset;
 
-        return asset;
+        emit CreatedAsset(currentAssetNumber, asset);
     }
-
 }

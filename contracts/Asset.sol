@@ -37,8 +37,7 @@ contract Asset is Ownable {
 
         serialNumber = _serialNumber;
         passphrase = _passphrase;
-
-        owner = address(0);
+        
         newOwner = address(0);
     }
 
@@ -49,6 +48,8 @@ contract Asset is Ownable {
             owner = msg.sender;
         }else{
             require(newOwner == msg.sender);
+            owner = msg.sender;
+            newOwner = address(0);
         }
 
         emit NewOwnerAsset(msg.sender, _comment);
